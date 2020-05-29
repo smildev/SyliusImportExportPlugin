@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace FriendsOfSylius\SyliusImportExportPlugin\Exporter;
 
-use FriendsOfSylius\SyliusImportExportPlugin\Exception\ExporterException;
-use FriendsOfSylius\SyliusImportExportPlugin\Exporter\Plugin\PluginPoolInterface;
-use FriendsOfSylius\SyliusImportExportPlugin\Exporter\Transformer\TransformerPoolInterface;
 use FriendsOfSylius\SyliusImportExportPlugin\Writer\WriterInterface;
-use Sylius\Bundle\ResourceBundle\Controller\RequestConfiguration;
 use Sylius\Component\Grid\Data\DataProvider;
 use Sylius\Component\Grid\Data\DataProviderInterface;
 use Sylius\Component\Grid\Definition\Field;
@@ -115,9 +111,14 @@ class GridExporter extends AbstractResourceExporter
      * @param ResourceInterface $resource
      *
      * @return array[]
+     * @throws \Exception
      */
     protected function getData(ResourceInterface $resource): array
     {
+        if (null === $this->gridDefinition) {
+            throw new \Exception("No grid found, 'setGrid' must be called before exporting data");
+        }
+
         $data = [];
         /** @var Field[] $fields */
         $fields = $this->getFields();

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace FriendsOfSylius\SyliusImportExportPlugin\Controller;
 
 use FriendsOfSylius\SyliusImportExportPlugin\Exporter\ExporterRegistry;
+use FriendsOfSylius\SyliusImportExportPlugin\Exporter\GridExporter;
+use FriendsOfSylius\SyliusImportExportPlugin\Exporter\GridExporterInterface;
 use FriendsOfSylius\SyliusImportExportPlugin\Exporter\ResourceExporterInterface;
 use Pagerfanta\Adapter\DoctrineORMAdapter;
 use Pagerfanta\Pagerfanta;
@@ -70,6 +72,11 @@ final class ExportDataController
         }
         /** @var ResourceExporterInterface $service */
         $service = $this->registry->get($name);
+
+        if ($configuration->hasGrid() && $service instanceof GridExporterInterface) {
+            $service->setExportFile($configuration->getGrid());
+            $service->setParameters($request->query->all());
+        }
 
         $resources = $this->findResources($configuration, $this->repository);
         $service->export($this->getResourceIds($resources));
