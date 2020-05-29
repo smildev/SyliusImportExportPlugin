@@ -8,13 +8,10 @@ use FriendsOfSylius\SyliusImportExportPlugin\Exporter\Plugin\PluginPoolInterface
 use FriendsOfSylius\SyliusImportExportPlugin\Exporter\Transformer\TransformerPoolInterface;
 use FriendsOfSylius\SyliusImportExportPlugin\Writer\WriterInterface;
 
-class ResourceExporter implements ResourceExporterInterface
+class ResourceExporter extends AbstractResourceExporter
 {
     /** @var string[] */
     protected $resourceKeys;
-
-    /** @var WriterInterface */
-    protected $writer;
 
     /** @var PluginPoolInterface */
     protected $pluginPool;
@@ -31,7 +28,8 @@ class ResourceExporter implements ResourceExporterInterface
         array $resourceKeys,
         ?TransformerPoolInterface $transformerPool
     ) {
-        $this->writer = $writer;
+        parent::__construct($writer);
+
         $this->pluginPool = $pluginPool;
         $this->transformerPool = $transformerPool;
         $this->resourceKeys = $resourceKeys;
@@ -40,26 +38,11 @@ class ResourceExporter implements ResourceExporterInterface
     /**
      * {@inheritdoc}
      */
-    public function setExportFile(string $filename): void
-    {
-        $this->writer->setFile($filename);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getExportedData(): string
-    {
-        return $this->writer->getFileContent();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function export(array $idsToExport): void
     {
         $this->pluginPool->initPlugins($idsToExport);
-        $this->writer->write($this->resourceKeys);
+
+        $this->writer->write($this->getResourceKeys());
 
         foreach ($idsToExport as $id) {
             $this->writeDataForId((string) $id);
@@ -74,7 +57,6 @@ class ResourceExporter implements ResourceExporterInterface
     public function exportData(array $idsToExport): array
     {
         $this->pluginPool->initPlugins($idsToExport);
-        $this->writer->write($this->resourceKeys);
 
         $exportIdDataArray = [];
 
@@ -83,13 +65,6 @@ class ResourceExporter implements ResourceExporterInterface
         }
 
         return $exportIdDataArray;
-    }
-
-    private function writeDataForId(string $id): void
-    {
-        $dataForId = $this->getDataForId($id);
-
-        $this->writer->write($dataForId);
     }
 
     /**
@@ -108,8 +83,15 @@ class ResourceExporter implements ResourceExporterInterface
         return $data;
     }
 
-    public function finish(): void
+    protected function getResourceKeys(): array
     {
-        $this->writer->finish();
+        return $this->resourceKeys;
+    }
+
+    private function writeDataForId(string $id): void
+    {
+        $dataForId = $this->getDataForId($id);
+
+        $this->writer->write($dataForId);
     }
 }
