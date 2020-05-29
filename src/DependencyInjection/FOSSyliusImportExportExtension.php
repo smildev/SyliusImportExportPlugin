@@ -4,14 +4,23 @@ declare(strict_types=1);
 
 namespace FriendsOfSylius\SyliusImportExportPlugin\DependencyInjection;
 
+use FriendsOfSylius\SyliusImportExportPlugin\Exporter\GridExporter;
 use Port\Csv\CsvReaderFactory;
 use Port\Csv\CsvWriter;
 use Port\Spreadsheet\SpreadsheetReaderFactory;
 use Port\Spreadsheet\SpreadsheetWriter;
+use Sylius\Component\Grid\Data\DataProvider;
+use Sylius\Component\Grid\Provider\GridProviderInterface;
+use Sylius\Component\Grid\Renderer\GridRendererInterface;
+use Sylius\Component\Resource\Metadata\Metadata;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\DependencyInjection\Loader;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class FOSSyliusImportExportExtension extends Extension
 {
@@ -64,5 +73,50 @@ class FOSSyliusImportExportExtension extends Extension
         $loader->load('services_import_json.yml');
 
         $loader->load('services_export_json.yml');
+
+        $this->loadGridExporter($container);
+    }
+
+    private function loadGridExporter(ContainerBuilder $container): void
+    {
+        $loadedResources = $container->getParameter('sylius.resources');
+
+        $formats = [];
+
+        if (class_exists(self::CLASS_CSV_WRITER)) {
+            $formats[] = 'csv';
+        }
+
+        if (class_exists(self::CLASS_SPREADSHEET_WRITER) && extension_loaded('zip')) {
+            $formats[] = 'xlsx';
+        }
+
+        foreach ($loadedResources as $alias => $resourceConfig) {
+            $metadata = Metadata::fromAliasAndConfiguration($alias, $resourceConfig);
+
+            foreach($formats as $format) {
+                $this->registerGridExporter($container, $metadata, $format);
+            }
+        }
+    }
+
+    private function registerGridExporter(ContainerBuilder $container, Metadata $metadata, string $format): void
+    {
+        $definition = new Definition(GridExporter::class);
+        $definition
+            ->setPublic(true)
+            ->setArguments([
+                new Reference(sprintf('sylius.exporter.%s_writer', $format)),
+                new Reference(TranslatorInterface::class),
+                new Reference(GridProviderInterface::class),
+                new Reference(GridRendererInterface::class),
+                new Reference(DataProvider::class),
+            ])
+            ->addTag('sylius.exporter', [
+                'type' => sprintf('%s.%s', $metadata->getApplicationName(), $metadata->getName()),
+                'format' => $format,
+            ]);
+
+        $container->setDefinition(sprintf('sylius.exporter.grid.%s.%s', $metadata->getApplicationName(), $metadata->getName()), $definition);
     }
 }

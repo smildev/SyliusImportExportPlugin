@@ -50,8 +50,7 @@ class GridExporter extends AbstractResourceExporter
         TranslatorInterface $translator,
         GridProviderInterface $gridProvider,
         GridRendererInterface $gridRenderer,
-        DataProvider $dataProvider,
-        string $resource
+        DataProvider $dataProvider
     ) {
         parent::__construct($writer);
 
@@ -59,7 +58,6 @@ class GridExporter extends AbstractResourceExporter
         $this->gridProvider = $gridProvider;
         $this->gridRenderer = $gridRenderer;
         $this->dataProvider = $dataProvider;
-        $this->resource = $resource;
 
         $this->parameters = [];
         $this->data = [];
