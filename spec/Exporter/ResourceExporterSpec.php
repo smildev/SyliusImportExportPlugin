@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace spec\FriendsOfSylius\SyliusImportExportPlugin\Exporter;
 
+use FriendsOfSylius\SyliusImportExportPlugin\Exporter\AbstractResourceExporter;
 use FriendsOfSylius\SyliusImportExportPlugin\Exporter\Plugin\PluginInterface;
 use FriendsOfSylius\SyliusImportExportPlugin\Exporter\Plugin\PluginPoolInterface;
 use FriendsOfSylius\SyliusImportExportPlugin\Exporter\ResourceExporter;
@@ -22,6 +23,11 @@ class ResourceExporterSpec extends ObjectBehavior
     function let(WriterInterface $writer, PluginPoolInterface $pluginPool)
     {
         $this->beConstructedWith($writer, $pluginPool, ['key1', 'key2'], null);
+    }
+
+    function it_extends_abstract_exporter()
+    {
+        $this->shouldHaveType(AbstractResourceExporter::class);
     }
 
     function it_is_initializable()

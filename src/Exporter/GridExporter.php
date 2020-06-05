@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace FriendsOfSylius\SyliusImportExportPlugin\Exporter;
 
 use FriendsOfSylius\SyliusImportExportPlugin\Writer\WriterInterface;
-use Sylius\Component\Grid\Data\DataProvider;
 use Sylius\Component\Grid\Data\DataProviderInterface;
 use Sylius\Component\Grid\Definition\Field;
 use Sylius\Component\Grid\Definition\Grid;
@@ -36,9 +35,6 @@ class GridExporter extends AbstractResourceExporter
     /** @var DataProviderInterface */
     private $dataProvider;
 
-    /** @var string */
-    private $resource;
-
     /** @var  */
     private $parameters;
 
@@ -50,7 +46,7 @@ class GridExporter extends AbstractResourceExporter
         TranslatorInterface $translator,
         GridProviderInterface $gridProvider,
         GridRendererInterface $gridRenderer,
-        DataProvider $dataProvider
+        DataProviderInterface $dataProvider
     ) {
         parent::__construct($writer);
 
@@ -113,10 +109,6 @@ class GridExporter extends AbstractResourceExporter
      */
     protected function getData(ResourceInterface $resource): array
     {
-        if (null === $this->gridDefinition) {
-            throw new \Exception("No grid found, 'setGrid' must be called before exporting data");
-        }
-
         $data = [];
         /** @var Field[] $fields */
         $fields = $this->getFields();
@@ -170,9 +162,14 @@ class GridExporter extends AbstractResourceExporter
      * @param ResourceInterface[]|array $idsToExport
      *
      * @return array
+     * @throws \Exception
      */
     protected function getResources(array $idsToExport): array
     {
+        if (null === $this->gridDefinition) {
+            throw new \Exception("No grid found, 'setGrid' must be called before exporting data");
+        }
+
         $parameters = array_merge(['ids' => $idsToExport, $this->parameters]);
 
         return $this->dataProvider->getData($this->gridDefinition, new Parameters($parameters));
