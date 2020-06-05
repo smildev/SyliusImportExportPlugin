@@ -84,29 +84,29 @@ class FOSSyliusImportExportExtension extends Extension
         $formats = [];
 
         if (class_exists(self::CLASS_CSV_WRITER)) {
-            $formats[] = 'csv';
+            $formats[] = ['csv' => 'csv'];
         }
 
         if (class_exists(self::CLASS_SPREADSHEET_WRITER) && extension_loaded('zip')) {
-            $formats[] = 'xlsx';
+            $formats[] = ['spreadsheet' => 'xlsx'];
         }
 
         foreach ($loadedResources as $alias => $resourceConfig) {
             $metadata = Metadata::fromAliasAndConfiguration($alias, $resourceConfig);
 
-            foreach($formats as $format) {
-                $this->registerGridExporter($container, $metadata, $format);
+            foreach($formats as $name => $format) {
+                $this->registerGridExporter($container, $metadata, $name, $format);
             }
         }
     }
 
-    private function registerGridExporter(ContainerBuilder $container, Metadata $metadata, string $format): void
+    private function registerGridExporter(ContainerBuilder $container, Metadata $metadata, string $name, string $format): void
     {
         $definition = new Definition(GridExporter::class);
         $definition
             ->setPublic(true)
             ->setArguments([
-                new Reference(sprintf('sylius.exporter.%s_writer', $format)),
+                new Reference(sprintf('sylius.exporter.%s_writer', $name)),
                 new Reference(TranslatorInterface::class),
                 new Reference(GridProviderInterface::class),
                 new Reference(GridRendererInterface::class),
