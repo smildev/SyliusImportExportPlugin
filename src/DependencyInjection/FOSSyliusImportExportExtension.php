@@ -84,11 +84,11 @@ class FOSSyliusImportExportExtension extends Extension
         $formats = [];
 
         if (class_exists(self::CLASS_CSV_WRITER)) {
-            $formats[] = ['csv' => 'csv'];
+            $formats['csv'] = ['csv'];
         }
 
         if (class_exists(self::CLASS_SPREADSHEET_WRITER) && extension_loaded('zip')) {
-            $formats[] = ['spreadsheet' => 'xlsx'];
+            $formats['spreadsheet'] = ['xlsx'];
         }
 
         foreach ($loadedResources as $alias => $resourceConfig) {
