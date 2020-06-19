@@ -35,7 +35,7 @@ class GridExporter extends AbstractResourceExporter
     /** @var DataProviderInterface */
     private $dataProvider;
 
-    /** @var  */
+    /** @var  array */
     private $parameters;
 
     /** @var array */
@@ -104,7 +104,7 @@ class GridExporter extends AbstractResourceExporter
     /**
      * @param ResourceInterface $resource
      *
-     * @return array[]
+     * @return array
      * @throws \Exception
      */
     protected function getData(ResourceInterface $resource): array
@@ -159,7 +159,7 @@ class GridExporter extends AbstractResourceExporter
     }
 
     /**
-     * @param ResourceInterface[]|array $idsToExport
+     * @param array $idsToExport
      *
      * @return array
      * @throws \Exception
@@ -170,9 +170,9 @@ class GridExporter extends AbstractResourceExporter
             throw new \Exception("No grid found, 'setGrid' must be called before exporting data");
         }
 
-        $parameters = array_merge(['ids' => $idsToExport, $this->parameters]);
+        $this->parameters['ids'] = $idsToExport;
 
-        return $this->dataProvider->getData($this->gridDefinition, new Parameters($parameters));
+        return $this->dataProvider->getData($this->gridDefinition, new Parameters($this->parameters));
     }
 
     private function writeData(ResourceInterface $resource): void

@@ -35,11 +35,6 @@ class GridExporterSpec extends ObjectBehavior
         $this->shouldHaveType(GridExporter::class);
     }
 
-    function it_should_implement_grid_export_interface()
-    {
-        $this->shouldImplement(GridExporterInterface::class);
-    }
-
     function it_extends_abstract_exporter()
     {
         $this->shouldHaveType(AbstractResourceExporter::class);
