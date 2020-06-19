@@ -108,9 +108,9 @@ class FOSSyliusImportExportExtension extends Extension
             ->setArguments([
                 new Reference(sprintf('sylius.exporter.%s_writer', $name)),
                 new Reference(TranslatorInterface::class),
-                new Reference(GridProviderInterface::class),
-                new Reference(GridRendererInterface::class),
-                new Reference(DataProvider::class),
+                new Reference('sylius.grid.provider'),
+                new Reference('sylius.grid.renderer'),
+                new Reference('sylius.grid.data_provider'),
             ])
             ->addTag('sylius.exporter', [
                 'type' => sprintf('%s.%s', $metadata->getApplicationName(), $metadata->getName()),
